@@ -29,6 +29,10 @@ func (r *QuestionRepository) GetAll() ([]models.Question, error) {
 	return questions, err
 }
 
+func (r *QuestionRepository) Update(q *models.Question) error {
+	return r.db.Save(q).Error
+}
+
 func (r *QuestionRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Question{}, id).Error
 }
