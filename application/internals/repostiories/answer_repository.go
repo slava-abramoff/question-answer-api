@@ -13,8 +13,8 @@ func NewAnswerRepository(db *gorm.DB) *AnswerRepository {
 	return &AnswerRepository{db: db}
 }
 
-func (r *AnswerRepository) Create(answer *models.Answer) error {
-	return r.db.Create(answer).Error
+func (r *AnswerRepository) Create(a *models.Answer) error {
+	return r.db.Create(a).Error
 }
 
 func (r *AnswerRepository) GetByID(id uint) (*models.Answer, error) {
@@ -27,6 +27,10 @@ func (r *AnswerRepository) GetByQuestion(questionID uint) ([]models.Answer, erro
 	var answers []models.Answer
 	err := r.db.Where("question_id = ?", questionID).Find(&answers).Error
 	return answers, err
+}
+
+func (r *AnswerRepository) Update(a *models.Answer) error {
+	return r.db.Save(a).Error
 }
 
 func (r *AnswerRepository) Delete(id uint) error {

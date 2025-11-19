@@ -14,7 +14,7 @@ type Answer struct {
 	Text       string `gorm:"type:text;not null"`
 	CreatedAt  time.Time
 
-	Question Question `gorm:"foreignKey:QuestionID"`
+	Question Question `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE"`
 }
 
 // id: int

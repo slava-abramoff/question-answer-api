@@ -5,21 +5,23 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	"github.com/slava-abramoff/question-answer-api/application/internals/services"
 )
 
-type QuestionHandler struct {
-	questionService *services.QuestionService
+type AnswerHandler struct {
+	answerService *services.AnswerService
 }
 
-func NewQuestionHandler(s *services.QuestionService) *QuestionHandler {
-	return &QuestionHandler{questionService: s}
+func NewAnswerHandler(s *services.AnswerService) *AnswerHandler {
+	return &AnswerHandler{answerService: s}
 }
 
-func (h *QuestionHandler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *AnswerHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	type Request struct {
-		Text string `json:"text"`
+		UserID string `json:"user_id"`
+		Text   string `json:"text"`
 	}
 
 	var body Request
@@ -28,28 +30,29 @@ func (h *QuestionHandler) Create(w http.ResponseWriter, r *http.Request, _ httpr
 		return
 	}
 
-	q, err := h.questionService.Create(body.Text)
+	questionIDStr := ps.ByName("id")
+	qID, err := strconv.Atoi(questionIDStr)
+	if err != nil {
+		http.Error(w, "invalid question id", http.StatusBadRequest)
+		return
+	}
+
+	if _, err := uuid.Parse(body.UserID); err != nil {
+		http.Error(w, "invalid user_id (must be uuid)", http.StatusBadRequest)
+		return
+	}
+
+	a, err := h.answerService.Create(uint(qID), body.UserID, body.Text)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(q)
+	json.NewEncoder(w).Encode(a)
 }
 
-func (h *QuestionHandler) GetAll(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	q, err := h.questionService.GetAll()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(q)
-}
-
-func (h *QuestionHandler) GetByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (h *AnswerHandler) GetByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	idStr := ps.ByName("id")
 	if idStr == "" {
 		http.Error(w, "id is required", http.StatusBadRequest)
@@ -62,17 +65,17 @@ func (h *QuestionHandler) GetByID(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	q, err := h.questionService.GetByID(uint(id))
+	a, err := h.answerService.GetByID(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(q)
+	json.NewEncoder(w).Encode(a)
 }
 
-func (h *QuestionHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (h *AnswerHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	type Request struct {
 		Text string `json:"text"`
 	}
@@ -95,17 +98,17 @@ func (h *QuestionHandler) Update(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	q, err := h.questionService.Update(uint(id), body.Text)
+	a, err := h.answerService.Update(uint(id), body.Text)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(q)
+	json.NewEncoder(w).Encode(a)
 }
 
-func (h *QuestionHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (h *AnswerHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	idStr := ps.ByName("id")
 	if idStr == "" {
 		http.Error(w, "id is required", http.StatusBadRequest)
@@ -118,8 +121,7 @@ func (h *QuestionHandler) Delete(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	err = h.questionService.Delete(uint(id))
-	if err != nil {
+	if err := h.answerService.Delete(uint(id)); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
