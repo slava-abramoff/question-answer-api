@@ -15,7 +15,7 @@ type Answer struct {
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 
-	Question Question `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE"`
+	Question Question `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
 // id: int
