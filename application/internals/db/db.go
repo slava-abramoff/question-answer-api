@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/slava-abramoff/question-answer-api/application/internals/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,12 +29,6 @@ func Connect() *gorm.DB {
 	}
 
 	fmt.Println("Database connected successfully")
-
-	// Автомиграция моделей
-	if err := db.AutoMigrate(&models.Question{}, &models.Answer{}); err != nil {
-		log.Println("AutoMigrate failed:", err)
-		return nil
-	}
 
 	return db
 }
