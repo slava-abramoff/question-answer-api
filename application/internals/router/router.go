@@ -10,6 +10,7 @@ func Setup(q *handlers.QuestionHandler, a *handlers.AnswerHandler) *httprouter.R
 
 	router.POST("/questions", q.Create)
 	router.GET("/questions/:id", q.GetByID)
+	router.GET("/questions", q.GetAll)
 	router.PUT("/questions/:id", q.Update)
 	router.DELETE("/questions/:id", q.Delete)
 
