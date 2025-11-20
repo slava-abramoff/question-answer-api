@@ -11,6 +11,7 @@
 
 ## Структура проекта
 
+```
 .
 ├── application/ # Исходный код приложения
 ├── migrations/ # SQL миграции для базы данных (goose)
@@ -18,6 +19,7 @@
 ├── Dockerfile # Dockerfile для сборки приложения
 ├── go.mod
 └── go.sum
+```
 
 ## Быстрый старт с Docker
 
@@ -45,7 +47,7 @@ docker compose build app
 docker compose up app
 ```
 
-4. **Остановка приложения**
+5. **Остановка приложения**
 
 ```bash
 docker compose down
