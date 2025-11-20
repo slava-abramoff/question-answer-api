@@ -7,12 +7,13 @@ import (
 )
 
 type Answer struct {
-	gorm.Model
 	ID         uint   `gorm:"primaryKey"`
 	QuestionID uint   `gorm:"not null"`
 	UserID     string `gorm:"type:uuid;not null"`
 	Text       string `gorm:"type:text;not null"`
 	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
 
 	Question Question `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE"`
 }
